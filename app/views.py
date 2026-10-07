@@ -15,3 +15,36 @@ def get_student(request):
     serialize = StudentSerializer(student, many=True)
     return Response({'status': 200, 'data': serialize.data})
 
+
+@api_view(['POST'])
+def create_student(request):
+    name = request.POST.get('name')
+    age = request.POST.get('age')
+    email = request.POST.get('email')
+    number = request.POST.get('number')
+
+    if request.method == 'POST':
+        Student.objects.create(name=name, age=age, email=email, number=number)
+        return Response({'status': 200, 'message': 'Student Created'})
+
+
+@api_view(['POST'])
+def createstudentJSON(request):
+    name = request.data.get('name')
+    age = request.data.get('age')
+    email = request.data.get('email')
+    number = request.data.get('number')
+
+    if request.method == 'POST':
+        Student.objects.create(name=name, age=age, email=email, number=number)
+        return Response({'status': 200, 'message': 'Student Created'})
+
+@api_view(['POST'])
+def CreateStudentSerializer(request):
+    data = request.data
+    serialize = StudentSerializer(data=data)
+    if serialize.is_valid():
+        serialize.save()
+        return Response({'message': 'succesfull'})
+    else:
+        return Response({'message': serialize.errors})    

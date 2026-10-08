@@ -2,7 +2,9 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from .models import *
 from .serializes import *
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 @api_view(['GET'])
@@ -47,4 +49,48 @@ def CreateStudentSerializer(request):
         serialize.save()
         return Response({'message': 'succesfull'})
     else:
-        return Response({'message': serialize.errors})    
+        return Response({'message': serialize.errors})
+
+
+
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def dumy(request):
+    return Response({'status': 200, 'message' : 'this is my dumy page',
+                     "username" : request.user.username,
+                     "email" : request.user.email,
+                     "first_name" : request.user.first_name               
+    })
+
+
+@api_view(['PUT'])
+def UpdateStudent(request, id):
+    try:
+        student = Student.objects.get(id=id)
+    except Student.DoesNotExist:
+        return Response({'status': 404, 'message': 'Student not found'})
+
+    serialize = StudentSerializer(student, data=request.data)
+    if serialize.is_valid():
+        serialize.save()
+        return Response({'status': 200, 'message': 'Student Updated', 'data': serialize.data})
+    else:
+        return Response({'status': 400, 'message': serialize.errors})
+
+
+@api_view(['PATCH'])
+def PatchStudent(request, id):
+    try:
+        student = Student.objects.get(id=id)
+    except Student.DoesNotExist:
+        return Response({'status': 404, 'message': 'Student not found'})
+
+    serialize = StudentSerializer(student, data=request.data, partial=True)
+    if serialize.is_valid():
+        serialize.save()
+        return Response({'status': 200, 'message': 'Student PATCH Updated', 'data': serialize.data})
+    else:
+        return Response({'status': 400, 'message': serialize.errors})
+    

@@ -5,6 +5,10 @@ from .serializes import *
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
+from .tokens import *
 
 # Create your views here.
 @api_view(['GET'])
@@ -54,15 +58,15 @@ def CreateStudentSerializer(request):
 
 
 
-@api_view(['GET'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def dumy(request):
-    return Response({'status': 200, 'message' : 'this is my dumy page',
-                     "username" : request.user.username,
-                     "email" : request.user.email,
-                     "first_name" : request.user.first_name               
-    })
+# # @api_view(['GET'])
+# # @authentication_classes([TokenAuthentication])
+# # @permission_classes([IsAuthenticated])
+# # def dumy(request):
+# #     return Response({'status': 200, 'message' : 'this is my dumy page',
+# #                      "username" : request.user.username,
+# #                      "email" : request.user.email,
+# #                      "first_name" : request.user.first_name               
+#     })
 
 
 @api_view(['PUT'])
@@ -93,4 +97,51 @@ def PatchStudent(request, id):
         return Response({'status': 200, 'message': 'Student PATCH Updated', 'data': serialize.data})
     else:
         return Response({'status': 400, 'message': serialize.errors})
-    
+
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def dumy(request):
+    return Response({'status': 200, 'message' : 'this is my dumy page',
+                     "username" : request.user.username,
+                     "email" : request.user.email,
+                     "first_name" : request.user.first_name          })
+
+
+
+
+# @api_view(['POST'])
+# def login_user(request):
+#     username = request.data.get('username')
+#     password = request.data.get('password')
+
+#     user = authenticate(username=username, password=password)
+
+#     if user is not None:
+#         refresh = RefreshToken.for_user(user)
+#         return Response({
+#             'message': 'Login successful',
+#             'refresh': str(refresh),
+#             'access': str(refresh.access_token),
+#         })
+
+#     return Response({'message': 'Invalid username or password'})
+
+@api_view(['POST'])
+def login_user(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    user = authenticate(username=username, password=password)
+
+    if user is not None:
+        refresh = MyToken.for_user(user)
+        return Response({
+            'message': 'Login successful',
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        })
+
+    return Response({'message': 'Invalid username or password'})
+

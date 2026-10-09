@@ -17,5 +17,7 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain'),
     path('refresh_token/', TokenRefreshView.as_view(), name='token_refresh'),
     path('login/', login_user, name='login'),
+    path('student-generic/', StudentGenericView.as_view(), name='student_generic'),
+    path('student-generic/<int:id>/', StudentGenericRUDView.as_view(), name='student_generic_detail'),
 
 ]

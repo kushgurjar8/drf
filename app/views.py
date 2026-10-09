@@ -10,6 +10,7 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from .tokens import *
 from .pagination import StudentPagination
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
 
 # GET METHOD:
 @api_view(['GET'])
@@ -169,3 +170,16 @@ def login_user(request):
 
     return Response({'message': 'Invalid username or password'})
 
+# GENERIC VIEW :
+
+# Create and read
+class StudentGenericView(ListAPIView, CreateAPIView):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+
+
+# PUT, PATCH, RETRIEVE :
+class StudentGenericRUDView(RetrieveAPIView, UpdateAPIView, DestroyAPIView):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+    lookup_field = 'id'

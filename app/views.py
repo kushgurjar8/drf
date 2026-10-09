@@ -9,8 +9,9 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from .tokens import *
+from .pagination import StudentPagination
 
-# Create your views here.
+# GET METHOD:
 @api_view(['GET'])
 def home(request):
     return Response({'status': 200, 'message': 'This is Home page'})
@@ -21,6 +22,7 @@ def get_student(request):
     serialize = StudentSerializer(student, many=True)
     return Response({'status': 200, 'data': serialize.data})
 
+#POST METHOD:
 
 @api_view(['POST'])
 def create_student(request):
@@ -45,6 +47,8 @@ def createstudentJSON(request):
         Student.objects.create(name=name, age=age, email=email, number=number)
         return Response({'status': 200, 'message': 'Student Created'})
 
+# SERIALIZER :
+
 @api_view(['POST'])
 def CreateStudentSerializer(request):
     data = request.data
@@ -68,6 +72,7 @@ def CreateStudentSerializer(request):
 # #                      "first_name" : request.user.first_name               
 #     })
 
+# PUT METHOD :
 
 @api_view(['PUT'])
 def UpdateStudent(request, id):
@@ -83,6 +88,7 @@ def UpdateStudent(request, id):
     else:
         return Response({'status': 400, 'message': serialize.errors})
 
+# PATCH METHOD :
 
 @api_view(['PATCH'])
 def PatchStudent(request, id):
@@ -99,17 +105,33 @@ def PatchStudent(request, id):
         return Response({'status': 400, 'message': serialize.errors})
 
 
+
+# PAGINATION :
+
+@api_view(['GET'])
+def get_student(request):
+    students = Student.objects.all().order_by('id')
+
+    paginator = StudentPagination() 
+    page = paginator.paginate_queryset(students, request)
+
+    serializer = StudentSerializer(page, many=True)
+    return paginator.get_paginated_response(serializer.data)
+
+# JWT AUTHENTICATION :
+
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def dumy(request):
-    return Response({'status': 200, 'message' : 'this is my dumy page',
+    return Response({'tatus': 200, 'message' : 'this is my dumy page',
                      "username" : request.user.username,
                      "email" : request.user.email,
                      "first_name" : request.user.first_name          })
 
 
 
+# TO FETCH TOKEN AND LOGIN :
 
 # @api_view(['POST'])
 # def login_user(request):
@@ -127,6 +149,8 @@ def dumy(request):
 #         })
 
 #     return Response({'message': 'Invalid username or password'})
+
+# CUSTOM TOKEN :
 
 @api_view(['POST'])
 def login_user(request):
